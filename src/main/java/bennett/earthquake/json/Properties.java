@@ -1,4 +1,4 @@
-package bennett.earthquake;
+package bennett.earthquake.json;
 
 public class Properties {
 

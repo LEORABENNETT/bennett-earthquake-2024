@@ -1,15 +1,13 @@
-package bennett.earthquake.json;
+package bennett.earthquake;
 
+import bennett.earthquake.json.Feature;
+import bennett.earthquake.json.FeatureCollection;
 import hu.akarnokd.rxjava3.swing.SwingSchedulers;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import bennett.earthquake.json.Feature;
-import bennett.earthquake.json.FeatureCollection;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
-import java.util.function.Function;
 
 public class EarthquakeFrame extends JFrame {
 

@@ -1,4 +1,4 @@
-package bennett.earthquake;
+package bennett.earthquake.json;
 
 import java.util.Properties;
 

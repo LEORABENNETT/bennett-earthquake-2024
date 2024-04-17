@@ -1,8 +1,8 @@
-package bennett.earthquake.json;
+package bennett.earthquake;
 
+import bennett.earthquake.json.FeatureCollection;
 import io.reactivex.rxjava3.core.Single;
 import retrofit2.http.GET;
-import bennett.earthquake.json.FeatureCollection;
 
 public interface EarthquakeService {
 

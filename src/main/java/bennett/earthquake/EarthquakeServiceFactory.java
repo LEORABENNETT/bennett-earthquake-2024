@@ -1,6 +1,5 @@
-package bennett.earthquake.json;
+package bennett.earthquake;
 
-import bennett.earthquake.EarthquakeService;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
