@@ -9,9 +9,7 @@ public class EarthquakeServiceFactory {
     public EarthquakeService getService() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://earthquake.usgs.gov/")
-                // Configure Retrofit to use Gson to turn the Json into Objects
                 .addConverterFactory(GsonConverterFactory.create())
-                // Configure Retrofit to use Rx
                 .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
                 .build();
 
