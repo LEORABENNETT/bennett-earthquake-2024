@@ -37,9 +37,8 @@ public class EarthquakeFrame extends JFrame {
         add(topPanel, BorderLayout.NORTH);
         add(jlist, BorderLayout.CENTER);
 
-        oneHourButton.setSelected(true); // Default selection
+        oneHourButton.setSelected(true);
 
-        // Add action listener to the radio buttons
         ActionListener radioButtonListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -54,7 +53,6 @@ public class EarthquakeFrame extends JFrame {
         oneHourButton.addActionListener(radioButtonListener);
         thirtyDaysButton.addActionListener(radioButtonListener);
 
-        // Fetch One Hour data by default
         fetchData(new EarthquakeServiceFactory().getService().oneHour());
     }
 
