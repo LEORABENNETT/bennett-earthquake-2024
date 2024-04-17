@@ -1,10 +1,11 @@
 import bennett.earthquake.EarthquakeService;
 import bennett.earthquake.EarthquakeServiceFactory;
-import org.junit.jupiter.api.Test;
 import bennett.earthquake.json.FeatureCollection;
 import bennett.earthquake.json.Properties;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class EarthquakeServiceTest {
 
