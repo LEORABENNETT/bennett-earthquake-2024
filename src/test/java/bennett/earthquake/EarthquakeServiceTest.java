@@ -15,7 +15,7 @@ class EarthquakeServiceTest {
         EarthquakeService service = new EarthquakeServiceFactory().getService();
 
         // when
-        FeatureCollection collection = service.oneHour().blockingGet();
+        FeatureCollection collection = service.oneHour().blockingFirst();
 
         // then
         Properties properties = collection.features[0].properties;
@@ -30,7 +30,7 @@ class EarthquakeServiceTest {
         EarthquakeService service = new EarthquakeServiceFactory().getService();
 
         // when
-        FeatureCollection collection = service.thirtyDays().blockingGet();
+        FeatureCollection collection = service.thirtyDays().blockingFirst();
 
         // then
         Properties properties = collection.features[0].properties;
