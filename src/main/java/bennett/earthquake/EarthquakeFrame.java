@@ -3,81 +3,96 @@ package bennett.earthquake;
 import bennett.earthquake.json.Feature;
 import bennett.earthquake.json.FeatureCollection;
 import hu.akarnokd.rxjava3.swing.SwingSchedulers;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class EarthquakeFrame extends JFrame {
 
-        private JList<String> jlist = new JList<>();
-        private JRadioButton oneHour = new JRadioButton("One hour");
-        private JRadioButton thirtyDays = new JRadioButton("thirty days");
-        private ButtonGroup timeGroup = new ButtonGroup();
-        private Disposable disposable;
+    private JList<String> jlist = new JList<>();
+    private JRadioButton oneHour = new JRadioButton("One hour");
+    private JRadioButton thirtyDays = new JRadioButton("thirty days");
+    private Disposable disposable;
+    private FeatureCollection featureCollection;
 
-        public EarthquakeFrame() {
 
-            setTitle("EarthquakeFrame");
-            setSize(300, 600);
-            setDefaultCloseOperation(EXIT_ON_CLOSE);
+    public EarthquakeFrame() {
+        setTitle("EarthquakeFrame");
+        setSize(300, 600);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-            setLayout(new BorderLayout());
+        setLayout(new BorderLayout());
 
-            add(jlist, BorderLayout.CENTER);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        buttonPanel.add(oneHour);
+        buttonPanel.add(thirtyDays);
 
-            JPanel radioPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-            radioPanel.add(oneHour);
-            radioPanel.add(thirtyDays);
+        ButtonGroup buttonGroup = new ButtonGroup();
+        buttonGroup.add(oneHour);
+        buttonGroup.add(thirtyDays);
 
-            add(radioPanel, BorderLayout.NORTH);
-            add(new JScrollPane(jlist), BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.PAGE_START);
+        add(jlist, BorderLayout.CENTER);
 
-            timeGroup.add(oneHour);
-            timeGroup.add(thirtyDays);
+        EarthquakeService service = new EarthquakeServiceFactory().getService();
 
-            oneHour.setSelected(true);
+        oneHour.addActionListener(e -> fetchData(service.oneHour()));
+        thirtyDays.addActionListener(e -> fetchData(service.thirtyDays()));
 
-            oneHour.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    // Handle one hour selection
-                    // Call the appropriate service method
+        jlist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        jlist.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting() && featureCollection != null) {
+                int index = jlist.getSelectedIndex();
+                if (index != -1) {
+                    Feature feature = featureCollection.features[index];
+                    double latitude = feature.geometry.coordinates[1];
+                    double longitude = feature.geometry.coordinates[0];
+                    if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                        try {
+                            Desktop.getDesktop().browse(new URI(
+                                    "https://www.google.com/maps/search/?api=1&query="
+                                            + latitude + "," + longitude));
+                        } catch (IOException | URISyntaxException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }
                 }
-            });
-
-            thirtyDays.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    // Handle thirty days selection
-                    // Call the appropriate service method
-                }
-            });
-
-            EarthquakeService service = new EarthquakeServiceFactory().getService();
-
-            Disposable disposable = service.oneHour()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(SwingSchedulers.edt())
-                    .subscribe(
-                            (response) -> handleResponse(response),
-                            Throwable::printStackTrace);
-        }
-
-        private void handleResponse(FeatureCollection response) {
-
-            String[] listData = new String[response.features.length];
-            for (int i = 0; i < response.features.length; i++) {
-                Feature feature = response.features[i];
-                listData[i] = feature.properties.mag + " " + feature.properties.place;
             }
-            jlist.setListData(listData);
-        }
+        });
 
-        public static void main(String[] args) {
-            new EarthquakeFrame().setVisible(true);
+        fetchData(service.oneHour());
+    }
+
+    private void fetchData(Single<FeatureCollection> single) {
+        if (disposable != null && !disposable.isDisposed()) {
+            disposable.dispose();
         }
+        disposable = single
+                .subscribeOn(Schedulers.io())
+                .observeOn(SwingSchedulers.edt())
+                .subscribe(
+                        this::handleResponse,
+                        Throwable::printStackTrace
+                );
+    }
+
+    private void handleResponse(FeatureCollection response) {
+        featureCollection = response;
+        String[] listData = new String[response.features.length];
+        for (int i = 0; i < response.features.length; i++) {
+            Feature feature = response.features[i];
+            listData[i] = feature.properties.mag + " " + feature.properties.place;
+        }
+        jlist.setListData(listData);
+    }
+
+    public static void main(String[] args) {
+        new EarthquakeFrame().setVisible(true);
+    }
 }
