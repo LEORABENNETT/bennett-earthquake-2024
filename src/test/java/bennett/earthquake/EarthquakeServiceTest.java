@@ -1,5 +1,5 @@
-import bennett.earthquake.EarthquakeService;
-import bennett.earthquake.EarthquakeServiceFactory;
+package bennett.earthquake;
+
 import bennett.earthquake.json.FeatureCollection;
 import bennett.earthquake.json.Properties;
 import org.junit.jupiter.api.Test;
