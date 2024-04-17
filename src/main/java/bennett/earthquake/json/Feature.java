@@ -1,9 +1,9 @@
 package bennett.earthquake.json;
 
-import java.util.Properties;
-
 public class Feature {
 
-    public Properties properties;
-
+    public Properties properties = new Properties();
+    double mag;
+    String place;
+    long time;
 }
