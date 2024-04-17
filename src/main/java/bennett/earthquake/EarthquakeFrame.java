@@ -11,6 +11,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class EarthquakeFrame extends JFrame {
 
@@ -18,6 +21,8 @@ public class EarthquakeFrame extends JFrame {
     private ButtonGroup buttonGroup = new ButtonGroup();
     private JRadioButton oneHourButton = new JRadioButton("One Hour");
     private JRadioButton thirtyDaysButton = new JRadioButton("Thirty Days");
+
+    private FeatureCollection featureCollection;
 
     public EarthquakeFrame() {
 
@@ -53,7 +58,32 @@ public class EarthquakeFrame extends JFrame {
         oneHourButton.addActionListener(radioButtonListener);
         thirtyDaysButton.addActionListener(radioButtonListener);
 
+        jlist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        jlist.addListSelectionListener(event -> {
+            if (!event.getValueIsAdjusting() && featureCollection != null) {
+                int selectedIndex = jlist.getSelectedIndex();
+                if (selectedIndex != -1) {
+                    openGoogleMaps(selectedIndex);
+                }
+            }
+        });
+
+
         fetchData(new EarthquakeServiceFactory().getService().oneHour());
+    }
+
+    private void openGoogleMaps(int index) {
+        Feature feature = featureCollection.features[index];
+        double latitude = feature.geometry.coordinates[1];
+        double longitude = feature.geometry.coordinates[0];
+        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+            try {
+                String googleMapsUrl = "https://www.google.com/maps/search/?api=1&query=" + latitude + "," + longitude;
+                Desktop.getDesktop().browse(new URI(googleMapsUrl));
+            } catch (IOException | URISyntaxException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
     }
 
     private void fetchData(Flowable<FeatureCollection> flowable) {
