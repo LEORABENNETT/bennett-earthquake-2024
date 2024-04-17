@@ -17,7 +17,7 @@ public class EarthquakeFrame extends JFrame {
 
     private JList<String> jlist = new JList<>();
     private JRadioButton oneHour = new JRadioButton("One hour");
-    private JRadioButton thirtyDays = new JRadioButton("thirty days");
+    private JRadioButton thirtyDays = new JRadioButton("30 days");
     private Disposable disposable;
     private FeatureCollection featureCollection;
 
@@ -29,7 +29,7 @@ public class EarthquakeFrame extends JFrame {
 
         setLayout(new BorderLayout());
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.add(oneHour);
         buttonPanel.add(thirtyDays);
 
@@ -74,8 +74,11 @@ public class EarthquakeFrame extends JFrame {
             disposable.dispose();
         }
         disposable = single
+                // tells Rx to request the data on a background Thread
                 .subscribeOn(Schedulers.io())
+                // tells Rx to handle the response on Swing's main Thread
                 .observeOn(SwingSchedulers.edt())
+                //.observeOn(AndroidSchedulers.mainThread()) // Instead use this on Android only
                 .subscribe(
                         this::handleResponse,
                         Throwable::printStackTrace
