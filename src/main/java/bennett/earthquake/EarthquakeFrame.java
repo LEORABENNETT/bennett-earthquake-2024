@@ -1,18 +1,23 @@
 package bennett.earthquake;
 
-import hu.akarnokd.rxjava3.swing.SwingSchedulers;
-import io.reactivex.rxjava3.disposables.Disposable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 import bennett.earthquake.json.Feature;
 import bennett.earthquake.json.FeatureCollection;
-
+import hu.akarnokd.rxjava3.swing.SwingSchedulers;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class EarthquakeFrame extends JFrame {
 
     private JList<String> jlist = new JList<>();
+    private ButtonGroup buttonGroup = new ButtonGroup();
+    private JRadioButton oneHourButton = new JRadioButton("One Hour");
+    private JRadioButton thirtyDaysButton = new JRadioButton("Thirty Days");
 
     public EarthquakeFrame() {
 
@@ -22,23 +27,48 @@ public class EarthquakeFrame extends JFrame {
 
         setLayout(new BorderLayout());
 
+        JPanel topPanel = new JPanel(new FlowLayout());
+        topPanel.add(oneHourButton);
+        topPanel.add(thirtyDaysButton);
+
+        buttonGroup.add(oneHourButton);
+        buttonGroup.add(thirtyDaysButton);
+
+        add(topPanel, BorderLayout.NORTH);
         add(jlist, BorderLayout.CENTER);
 
-        EarthquakeService service = new EarthquakeServiceFactory().getService();
+        oneHourButton.setSelected(true); // Default selection
 
-        Disposable disposable = service.oneHour()
-                // tells Rx to request the data on a background Thread
+        // Add action listener to the radio buttons
+        ActionListener radioButtonListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (oneHourButton.isSelected()) {
+                    fetchData(new EarthquakeServiceFactory().getService().oneHour());
+                } else if (thirtyDaysButton.isSelected()) {
+                    fetchData(new EarthquakeServiceFactory().getService().thirtyDays());
+                }
+            }
+        };
+
+        oneHourButton.addActionListener(radioButtonListener);
+        thirtyDaysButton.addActionListener(radioButtonListener);
+
+        // Fetch One Hour data by default
+        fetchData(new EarthquakeServiceFactory().getService().oneHour());
+    }
+
+    private void fetchData(Flowable<FeatureCollection> flowable) {
+        Disposable disposable = flowable
                 .subscribeOn(Schedulers.io())
-                // tells Rx to handle the response on Swing's main Thread
                 .observeOn(SwingSchedulers.edt())
-                //.observeOn(AndroidSchedulers.mainThread()) // Instead use this on Android only
                 .subscribe(
-                        (response) -> handleResponse(response),
+                        this::handleResponse,
                         Throwable::printStackTrace);
     }
 
-    private void handleResponse(FeatureCollection response) {
 
+    private void handleResponse(FeatureCollection response) {
         String[] listData = new String[response.features.length];
         for (int i = 0; i < response.features.length; i++) {
             Feature feature = response.features[i];
@@ -48,7 +78,6 @@ public class EarthquakeFrame extends JFrame {
     }
 
     public static void main(String[] args) {
-        new EarthquakeFrame().setVisible(true);
+        SwingUtilities.invokeLater(() -> new EarthquakeFrame().setVisible(true));
     }
-
 }
